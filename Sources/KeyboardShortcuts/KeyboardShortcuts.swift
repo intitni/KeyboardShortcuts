@@ -4,6 +4,8 @@ import AppKit.NSMenu
 Global keyboard shortcuts for your macOS app.
 */
 public enum KeyboardShortcuts {
+    public static var userDefaults = UserDefaults.standard
+    
 	private static var registeredShortcuts = Set<Shortcut>()
 
 	private static var legacyKeyDownHandlers = [Name: [() -> Void]]()
@@ -293,7 +295,7 @@ public enum KeyboardShortcuts {
 	*/
 	public static func getShortcut(for name: Name) -> Shortcut? {
 		guard
-			let data = UserDefaults.standard.string(forKey: userDefaultsKey(for: name))?.data(using: .utf8),
+			let data = userDefaults.string(forKey: userDefaultsKey(for: name))?.data(using: .utf8),
 			let decoded = try? JSONDecoder().decode(Shortcut.self, from: data)
 		else {
 			return nil
@@ -426,7 +428,7 @@ public enum KeyboardShortcuts {
 		}
 
 		register(shortcut)
-		UserDefaults.standard.set(encoded, forKey: userDefaultsKey(for: name))
+        userDefaults.set(encoded, forKey: userDefaultsKey(for: name))
 		userDefaultsDidChange(name: name)
 	}
 
@@ -435,7 +437,7 @@ public enum KeyboardShortcuts {
 			return
 		}
 
-		UserDefaults.standard.set(false, forKey: userDefaultsKey(for: name))
+        userDefaults.set(false, forKey: userDefaultsKey(for: name))
 		unregister(shortcut)
 		userDefaultsDidChange(name: name)
 	}
@@ -445,13 +447,13 @@ public enum KeyboardShortcuts {
 			return
 		}
 
-		UserDefaults.standard.removeObject(forKey: userDefaultsKey(for: name))
+        userDefaults.removeObject(forKey: userDefaultsKey(for: name))
 		unregister(shortcut)
 		userDefaultsDidChange(name: name)
 	}
 
 	static func userDefaultsContains(name: Name) -> Bool {
-		UserDefaults.standard.object(forKey: userDefaultsKey(for: name)) != nil
+        userDefaults.object(forKey: userDefaultsKey(for: name)) != nil
 	}
 }
 
